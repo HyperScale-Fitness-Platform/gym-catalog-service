@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gym-catalog-service
+  namespace: gym-dev
+  labels:
+    app: gym-catalog-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gym-catalog-service
+  template:
+    metadata:
+      labels:
+        app: gym-catalog-service
+    spec:
+      initContainers:
+        - name: wait-for-postgres
+          image: busybox:1.35.0
+          imagePullPolicy: IfNotPresent
+          command:
+            - sh
+            - -c
+            - until nc -z catalog-postgres 5432; do echo "waiting for catalog-postgres"; sleep 2; done;
+      containers:
+        - name: app
+          image: <account-id>.dkr.ecr.<region>.amazonaws.com/gym-catalog-service:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3000
+              name: http
+          env:
+            - name: PORT
+              value: "3000"
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: DATABASE_URL
+            - name: PGSSLMODE
+              value: "disable"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
