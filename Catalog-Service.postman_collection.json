@@ -1,0 +1,187 @@
+{
+  "info": {
+    "_postman_id": "gym-catalog-service-collection",
+    "name": "Catalog Service API",
+    "description": "Gym Catalog Service - product management and stock operations",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:3000", "type": "string" },
+    { "key": "admin_user_id", "value": "admin-1", "type": "string" },
+    { "key": "service_user_id", "value": "order-service", "type": "string" },
+    { "key": "product_id", "value": "", "type": "string" },
+    { "key": "category", "value": "supplements", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "user-id", "value": "{{admin_user_id}}" },
+              { "key": "user-role", "value": "admin" }
+            ],
+            "url": "{{base_url}}/health"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Products",
+      "item": [
+        {
+          "name": "Create Product (admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "user-id", "value": "{{admin_user_id}}" },
+              { "key": "user-role", "value": "admin" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Whey Protein\",\n  \"description\": \"High-protein powder for post-workout recovery\",\n  \"category\": \"supplements\",\n  \"price_cents\": 3999,\n  \"stock_qty\": 25\n}"
+            },
+            "url": "{{base_url}}/api/products"
+          }
+        },
+        {
+          "name": "List Products",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "user-id", "value": "{{admin_user_id}}" },
+              { "key": "user-role", "value": "admin" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/products?category={{category}}&is_active=true&limit=10&page=1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "products"],
+              "query": [
+                { "key": "category", "value": "{{category}}" },
+                { "key": "is_active", "value": "true" },
+                { "key": "limit", "value": "10" },
+                { "key": "page", "value": "1" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Product By ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "user-id", "value": "{{admin_user_id}}" },
+              { "key": "user-role", "value": "admin" }
+            ],
+            "url": "{{base_url}}/api/products/{{product_id}}"
+          }
+        },
+        {
+          "name": "Update Product (admin)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "user-id", "value": "{{admin_user_id}}" },
+              { "key": "user-role", "value": "admin" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"price_cents\": 4299,\n  \"stock_qty\": 30\n}"
+            },
+            "url": "{{base_url}}/api/products/{{product_id}}"
+          }
+        },
+        {
+          "name": "Delete Product (soft delete)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "user-id", "value": "{{admin_user_id}}" },
+              { "key": "user-role", "value": "admin" }
+            ],
+            "url": "{{base_url}}/api/products/{{product_id}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Stock Operations",
+      "item": [
+        {
+          "name": "Reserve Stock (service)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "user-id", "value": "{{service_user_id}}" },
+              { "key": "user-role", "value": "service" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quantity\": 2\n}"
+            },
+            "url": "{{base_url}}/api/products/{{product_id}}/reserve-stock"
+          }
+        },
+        {
+          "name": "Release Stock (service)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "user-id", "value": "{{service_user_id}}" },
+              { "key": "user-role", "value": "service" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quantity\": 2\n}"
+            },
+            "url": "{{base_url}}/api/products/{{product_id}}/release-stock"
+          }
+        },
+        {
+          "name": "Reserve Stock (insufficient) -> 409",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "user-id", "value": "{{service_user_id}}" },
+              { "key": "user-role", "value": "service" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quantity\": 999\n}"
+            },
+            "url": "{{base_url}}/api/products/{{product_id}}/reserve-stock"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Security",
+      "item": [
+        {
+          "name": "Create Product as non-admin -> 403",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "user-id", "value": "customer-42" },
+              { "key": "user-role", "value": "customer" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Restricted Product\",\n  \"category\": \"gear\",\n  \"price_cents\": 2500,\n  \"stock_qty\": 5\n}"
+            },
+            "url": "{{base_url}}/api/products"
+          }
+        }
+      ]
+    }
+  ]
+}
