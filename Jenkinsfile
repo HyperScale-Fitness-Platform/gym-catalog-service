@@ -51,7 +51,7 @@ pipeline {
                     set -e
                     SECRET_JSON=$(aws secretsmanager get-secret-value \
                         --region "${AWS_REGION}" \
-                        --secret-id "${POSTGRES_SECRET_NAME}" \
+                        --secret-id "${SECRET_NAME}" \
                         --query SecretString \
                         --output text)
 
