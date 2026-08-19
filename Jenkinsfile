@@ -55,9 +55,9 @@ pipeline {
                         --query SecretString \
                         --output text)
 
-                    POSTGRES_USER=$(python3 -c 'import json,sys; d=json.loads(sys.stdin.read()); print(d.get("POSTGRES_USER") or d.get("username") or d.get("user") or "postgres")' <<< "$SECRET_JSON")
-                    POSTGRES_PASSWORD=$(python3 -c 'import json,sys; d=json.loads(sys.stdin.read()); print(d.get("POSTGRES_PASSWORD") or d.get("password") or "postgres")' <<< "$SECRET_JSON")
-                    POSTGRES_DB=$(python3 -c 'import json,sys; d=json.loads(sys.stdin.read()); print(d.get("POSTGRES_DB") or d.get("database") or d.get("dbname") or "gym_catalog")' <<< "$SECRET_JSON")
+                    POSTGRES_USER=$(printf '%s' "$SECRET_JSON" | python3 -c 'import json,sys; d=json.loads(sys.stdin.read()); print(d.get("POSTGRES_USER") or d.get("username") or d.get("user") or "postgres")')
+                    POSTGRES_PASSWORD=$(printf '%s' "$SECRET_JSON" | python3 -c 'import json,sys; d=json.loads(sys.stdin.read()); print(d.get("POSTGRES_PASSWORD") or d.get("password") or "postgres")')
+                    POSTGRES_DB=$(printf '%s' "$SECRET_JSON" | python3 -c 'import json,sys; d=json.loads(sys.stdin.read()); print(d.get("POSTGRES_DB") or d.get("database") or d.get("dbname") or "gym_catalog")')
 
                     kubectl create secret generic postgres-secret \
                         -n "${NAMESPACE}" \
