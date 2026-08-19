@@ -7,7 +7,7 @@ pipeline {
         NAMESPACE      = "gym-dev"
         AWS_REGION     = "us-east-1"
         CLUSTER_NAME   = "gym-cluster"
-        SECRET_NAME    = "gym/dev/catalog-postgres-credentials"
+        POSTGRES_SECRET_NAME = "gym-catalog-service/postgres-credentials"
 
         IMAGE_TAG      = "${env.GIT_COMMIT ? env.GIT_COMMIT.take(7) : 'latest'}"
 
@@ -47,7 +47,26 @@ pipeline {
 
         stage('Deploy Postgres') {
             steps {
-                sh "kubectl apply -f ${env.KUBERNETES_DIR}/secret.yaml"
+                sh '''
+                    set -e
+                    SECRET_JSON=$(aws secretsmanager get-secret-value \
+                        --region "${AWS_REGION}" \
+                        --secret-id "${POSTGRES_SECRET_NAME}" \
+                        --query SecretString \
+                        --output text)
+
+                    POSTGRES_USER=$(python3 -c 'import json,sys; d=json.loads(sys.stdin.read()); print(d.get("POSTGRES_USER") or d.get("username") or d.get("user") or "postgres")' <<< "$SECRET_JSON")
+                    POSTGRES_PASSWORD=$(python3 -c 'import json,sys; d=json.loads(sys.stdin.read()); print(d.get("POSTGRES_PASSWORD") or d.get("password") or "postgres")' <<< "$SECRET_JSON")
+                    POSTGRES_DB=$(python3 -c 'import json,sys; d=json.loads(sys.stdin.read()); print(d.get("POSTGRES_DB") or d.get("database") or d.get("dbname") or "gym_catalog")' <<< "$SECRET_JSON")
+
+                    kubectl create secret generic postgres-secret \
+                        -n "${NAMESPACE}" \
+                        --from-literal=POSTGRES_USER="$POSTGRES_USER" \
+                        --from-literal=POSTGRES_PASSWORD="$POSTGRES_PASSWORD" \
+                        --from-literal=POSTGRES_DB="$POSTGRES_DB" \
+                        --from-literal=DATABASE_URL="postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@catalog-postgres:5432/${POSTGRES_DB}" \
+                        --dry-run=client -o yaml | kubectl apply -f -
+                '''
                 sh "kubectl apply -f ${env.KUBERNETES_DIR}/postgres-statefulset.yaml"
                 sh "kubectl apply -f ${env.KUBERNETES_DIR}/postgres-service.yaml"
                 sh "kubectl rollout status statefulset/postgres -n ${env.NAMESPACE} --timeout=180s"
