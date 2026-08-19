@@ -7,7 +7,7 @@ pipeline {
         NAMESPACE      = "gym-dev"
         AWS_REGION     = "us-east-1"
         CLUSTER_NAME   = "gym-cluster"
-        POSTGRES_SECRET_NAME = "gym-catalog-service/postgres-credentials"
+        SECRET_NAME    = "gym/dev/catalog-postgres-credentials"
 
         IMAGE_TAG      = "${env.GIT_COMMIT ? env.GIT_COMMIT.take(7) : 'latest'}"
 
