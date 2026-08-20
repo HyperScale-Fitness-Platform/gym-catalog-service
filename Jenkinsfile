@@ -8,6 +8,8 @@ pipeline {
         AWS_REGION     = "us-east-1"
         CLUSTER_NAME   = "gym-cluster"
         SECRET_NAME    = "gym/dev/catalog-postgres-credentials"
+        POSTGRES_SERVICE_NAME = "gym-catalog-postgres"
+        POSTGRES_STATEFULSET_NAME = "gym-catalog-postgres"
 
         IMAGE_TAG      = "${env.GIT_COMMIT ? env.GIT_COMMIT.take(7) : 'latest'}"
 
@@ -64,12 +66,12 @@ pipeline {
                         --from-literal=POSTGRES_USER="$POSTGRES_USER" \
                         --from-literal=POSTGRES_PASSWORD="$POSTGRES_PASSWORD" \
                         --from-literal=POSTGRES_DB="$POSTGRES_DB" \
-                        --from-literal=DATABASE_URL="postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@gym-catalog-postgres:15432/${POSTGRES_DB}" \
+                        --from-literal=DATABASE_URL="postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_SERVICE_NAME}:15432/${POSTGRES_DB}" \
                         --dry-run=client -o yaml | kubectl apply -f -
                 '''
                 sh "kubectl apply -f ${env.KUBERNETES_DIR}/postgres-statefulset.yaml"
                 sh "kubectl apply -f ${env.KUBERNETES_DIR}/postgres-service.yaml"
-                sh "kubectl rollout status statefulset/postgres -n ${env.NAMESPACE} --timeout=180s"
+                sh "kubectl rollout status statefulset/${env.POSTGRES_STATEFULSET_NAME} -n ${env.NAMESPACE} --timeout=180s"
             }
         }
 
