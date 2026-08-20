@@ -1,4 +1,9 @@
 function auth(req, res, next) {
+  // Health checks are public and should not require gateway identity headers.
+  if (req.path === "/health") {
+    return next();
+  }
+
   // Trust user-* headers from the gateway; no re-verification needed.
   // These headers are only set by the gateway and inaccessible from outside the cluster.
   const userId = req.headers["user-id"];
