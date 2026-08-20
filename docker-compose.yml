@@ -9,6 +9,27 @@ services:
       - "5435:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d gym_catalog"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: gym-catalog-service:local
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PORT: "3000"
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/gym_catalog
+      PGSSLMODE: disable
+    ports:
+      - "3000:3000"
     restart: unless-stopped
 
 volumes:
