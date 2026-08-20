@@ -22,17 +22,17 @@ spec:
           command:
             - sh
             - -c
-            - until nc -z catalog-postgres 5432; do echo "waiting for catalog-postgres"; sleep 2; done;
+            - until nc -z gym-catalog-postgres 15432; do echo "waiting for gym-catalog-postgres:15432"; sleep 2; done;
       containers:
         - name: app
           image: <account-id>.dkr.ecr.<region>.amazonaws.com/gym-catalog-service:latest
           imagePullPolicy: Always
           ports:
-            - containerPort: 3000
+            - containerPort: 4005
               name: http
           env:
             - name: PORT
-              value: "3000"
+              value: "4005"
             - name: DATABASE_URL
               valueFrom:
                 secretKeyRef:
@@ -43,13 +43,13 @@ spec:
           readinessProbe:
             httpGet:
               path: /health
-              port: 3000
+              port: 4005
             initialDelaySeconds: 5
             periodSeconds: 10
           livenessProbe:
             httpGet:
               path: /health
-              port: 3000
+              port: 4005
             initialDelaySeconds: 15
             periodSeconds: 20
           resources:

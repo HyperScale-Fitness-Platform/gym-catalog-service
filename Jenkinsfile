@@ -64,7 +64,7 @@ pipeline {
                         --from-literal=POSTGRES_USER="$POSTGRES_USER" \
                         --from-literal=POSTGRES_PASSWORD="$POSTGRES_PASSWORD" \
                         --from-literal=POSTGRES_DB="$POSTGRES_DB" \
-                        --from-literal=DATABASE_URL="postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@catalog-postgres:5432/${POSTGRES_DB}" \
+                        --from-literal=DATABASE_URL="postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@gym-catalog-postgres:15432/${POSTGRES_DB}" \
                         --dry-run=client -o yaml | kubectl apply -f -
                 '''
                 sh "kubectl apply -f ${env.KUBERNETES_DIR}/postgres-statefulset.yaml"
