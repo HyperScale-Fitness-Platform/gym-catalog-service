@@ -43,7 +43,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Whey Protein\",\n  \"description\": \"High-protein powder for post-workout recovery\",\n  \"category\": \"supplements\",\n  \"price_cents\": 3999,\n  \"stock_qty\": 25\n}"
+              "raw": "{\n  \"name\": \"Whey Protein\",\n  \"description\": \"High-protein powder for post-workout recovery\",\n  \"category\": \"supplements\",\n  \"price_cents\": 3999,\n  \"stock_qty\": 25,\n  \"image_path\": \"s3://gym-assets/products/whey-protein.jpg\"\n}"
             },
             "url": "{{base_url}}/api/products"
           }
@@ -91,7 +91,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"price_cents\": 4299,\n  \"stock_qty\": 30\n}"
+              "raw": "{\n  \"price_cents\": 4299,\n  \"stock_qty\": 30,\n  \"image_path\": \"s3://gym-assets/products/whey-protein-updated.jpg\"\n}"
             },
             "url": "{{base_url}}/api/products/{{product_id}}"
           }

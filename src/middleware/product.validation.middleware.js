@@ -6,6 +6,7 @@ function validateProduct(options = {}) {
     "category",
     "price_cents",
     "stock_qty",
+    "image_path",
     "is_active",
   ];
 
@@ -43,6 +44,12 @@ function validateProduct(options = {}) {
       ) {
         return res.status(400).json({ message: "Invalid stock_qty" });
       }
+      if (
+        body.image_path !== undefined &&
+        (typeof body.image_path !== "string" || body.image_path.length > 500)
+      ) {
+        return res.status(400).json({ message: "Invalid image_path (max 500 chars)" });
+      }
     } else {
       // partial update: validate types if present
       if (
@@ -65,6 +72,12 @@ function validateProduct(options = {}) {
         (typeof body.stock_qty !== "number" || body.stock_qty < 0)
       ) {
         return res.status(400).json({ message: "Invalid stock_qty" });
+      }
+      if (
+        body.image_path !== undefined &&
+        (typeof body.image_path !== "string" || body.image_path.length > 500)
+      ) {
+        return res.status(400).json({ message: "Invalid image_path (max 500 chars)" });
       }
     }
 

@@ -6,11 +6,12 @@ async function createProduct({
   category,
   price_cents,
   stock_qty = 0,
+  image_path,
 }) {
   const result = await pool.query(
-    `INSERT INTO products (name, description, category, price_cents, stock_qty)
-     VALUES ($1,$2,$3,$4,$5) RETURNING *`,
-    [name, description || null, category, price_cents, stock_qty],
+    `INSERT INTO products (name, description, category, price_cents, stock_qty, image_path)
+     VALUES ($1,$2,$3,$4,$5,$6) RETURNING *`,
+    [name, description || null, category, price_cents, stock_qty, image_path || null],
   );
   return result.rows[0];
 }
@@ -50,6 +51,7 @@ async function updateProduct(id, fields = {}) {
     "category",
     "price_cents",
     "stock_qty",
+    "image_path",
     "is_active",
   ];
   const sets = [];
